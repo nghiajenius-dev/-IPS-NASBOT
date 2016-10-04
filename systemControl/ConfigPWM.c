@@ -13,8 +13,9 @@ void ConfigSystem(void)
 	//Enable FPU
 	ROM_FPULazyStackingEnable();
 	ROM_FPUEnable();
-	// Configure clock
+	//Config clock @16Mhz
 	ROM_SysCtlClockSet(SYSCTL_SYSDIV_1 | SYSCTL_USE_OSC | SYSCTL_OSC_MAIN | SYSCTL_XTAL_16MHZ);
+
 }
 
 void ConfigPWM(void)

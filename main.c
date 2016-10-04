@@ -65,9 +65,9 @@ void onButtonDown(void) {
 // ==================================================================================== //
 int main()
 {
-	// Set the system clock to run at 50Mhz off PLL with external crystal as reference.
-	//Config clock
+
 	ConfigSystem();
+//	SysCtlClockSet(SYSCTL_SYSDIV_5|SYSCTL_USE_PLL|SYSCTL_OSC_MAIN|SYSCTL_XTAL_16MHZ);
 	Timer_Init();
 	ConfigPWM();
 	SetPWM();
@@ -80,22 +80,24 @@ int main()
 	//	GPIOPinTypeGPIOInput(GPIO_PORTE_BASE, GPIO_PIN_4);  // Init PF4 as input
 	//	GPIOPadConfigSet(GPIO_PORTE_BASE, GPIO_PIN_4, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPU);  // Enable weak pullup resistor for PF
 
-//	BSP_Init();
-//	MRFI_Init();
-//	mrfiSpiWriteReg(PA_TABLE0,0xC0);
-//	MRFI_WakeUp();
-//	MRFI_RxOn();
-//	packet.frame[0]=8+5;
+	BSP_Init();
+	MRFI_Init();
+	mrfiSpiWriteReg(PA_TABLE0,0xC0);
+	MRFI_WakeUp();
+	MRFI_RxOn();
+	packet.frame[0]=8+5;
 	//config timer
 
 	//!TODO-CONFLICT!!!
 	//STOP AFTER 4 IMU DATA!!!
-//	timer = TIMER_RegisterEvent(&Timer_reset_all, RESET_SYSTEM_TIME);
-//	config_gpio();
+	timer = TIMER_RegisterEvent(&Timer_reset_all, RESET_SYSTEM_TIME);
+	config_gpio();
 
 	//TODO: IMU fuctions integrated
 	Uart_RF_config();			// migrated from UART_init()
 	IMU_init();
+	while(!(LSM9DS1_begin()));
+
 	UARTprintf("Hello, I'm NASBOT!\n");
 	IMU_readWHOAMI_AG(&rev_data[0]);
 	IMU_readWHOAMI_M(&rev_data[1]);
@@ -103,11 +105,13 @@ int main()
 	if((rev_data[0]==0x68)&&(rev_data[1]==0x3D))
 		UARTprintf("IMU check: ok!\n");
 
+	UARTprintf("clock %d\n",SysCtlClockGet());
+
 	while (1)
 	{
-		//MRFI_DelayMs(200);
-		//MRFI_Transmit(&packet, MRFI_TX_TYPE_FORCED);
-		//BSP_TOGGLE_LED1();
+		MRFI_DelayMs(200);
+		MRFI_Transmit(&packet, MRFI_TX_TYPE_FORCED);
+		BSP_TOGGLE_LED1();
 
 		//TODO: IMU fuctions integrated
 		printAccel(); // Print "A: ax, ay, az"
@@ -115,7 +119,7 @@ int main()
 		printMag();   // Print "M: mx, my, mz"
 
 		printAttitude(ax, ay, az, -my, -mx, mz);
-		SysCtlDelay(10000000);
+//		SysCtlDelay(10000000);
 	}
 }
 
